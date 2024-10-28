@@ -218,8 +218,6 @@ def process_image(img, bbox_list, padding, bg_color, border):
 
 def draw_bounding_boxes(image_path, bbox_list, label_list, output_path, color = 'red', thickness=2):
     
-    print('draw bb hit')
-    
     # Open the image
     image = Image.open(image_path)
     draw = ImageDraw.Draw(image)
@@ -237,14 +235,9 @@ def draw_bounding_boxes(image_path, bbox_list, label_list, output_path, color = 
     image.save(output_path)
 
 def draw_bounding_boxes_in_mem(image, bbox_list, label_list, output_path, color='red', thickness=2):
-
-    if isinstance(image, Image.Image):
-        image_pil = image
-    else:
-        if isinstance(image, np.ndarray):
-            image_pil = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-        else:
-            raise TypeError("Unsupported image type. Expected a PIL Image or numpy array.")
+    
+    image_pil = image.astype(np.uint8)
+    image_pil = Image.fromarray(image_pil)
         
     draw = ImageDraw.Draw(image_pil)
     font = ImageFont.load_default()
@@ -486,9 +479,9 @@ def pp_inference(img, url):
     pred_classes = []
     remove_list = []
     
-    for j, img in enumerate(elem_img_list):
+    for j, elem_img in enumerate(elem_img_list):
         
-        img_t = transform(img.convert('RGB')).unsqueeze(0).to('cuda')
+        img_t = transform(elem_img.convert('RGB')).unsqueeze(0).to('cuda')
         
         with torch.no_grad():
             output = classifier(img_t)
